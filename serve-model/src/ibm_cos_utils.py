@@ -76,7 +76,18 @@ def save_file(path_object, file_name):
     except Exception as e:
         log("Unable to put file: {0}".format(e))
         sys.exit(1)
-        
+
+def get_model_endpoint(): 
+    try:
+        log(COS_ENDPOINT)
+        return COS_ENDPOINT
+    except ClientError as be:
+        log(be)
+        sys.exit(1)
+    except Exception as e:
+        log("Unable to return model endpoint: {0}".format(e))
+        sys.exit(1)
+
 # create cloud object storage connection
 cos_cli = ibm_boto3.client("s3",
     ibm_api_key_id=COS_API_KEY_ID,
@@ -85,12 +96,23 @@ cos_cli = ibm_boto3.client("s3",
     config=Config(signature_version="oauth"),
     endpoint_url=COS_ENDPOINT
 )
+
 try:
     response = cos_cli.list_buckets()
-    log("Connection successful. List of buckets:")
-    log(response['Buckets'])
+    log("Connection successful")
 except Exception as e:
-    log("Connection failed")
+    log("list buckets - Connection failed")
     sys.exit(1)
 
+
+directory_name = 'model'
+
+objects = cos_cli.list_objects(Bucket=bucket_name)
+
+for object in objects['Contents']:
+    path = object['Key']
+    print(path)
+#    if object['Prefix'] == directory_name:
+#        path = object['Key']
+#        break
 

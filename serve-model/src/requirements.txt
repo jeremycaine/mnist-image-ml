@@ -1,1 +1,2 @@
 seldon-core
+ibm_cos_sdk

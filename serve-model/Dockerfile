@@ -13,12 +13,12 @@ RUN pip install -U "pip>=19.3.1" && \
 USER 1001
 
 ## 3. Image identification
-LABEL name="jeremycaine/mnist-image-ml/train-model" \
+LABEL name="jeremycaine/mnist-image-ml/serve-model" \
       vendor="Acme, Inc." \
       version="1.2.3" \
       release="45" \
       summary="Digital image recognition" \
-      description="Model training on MNIST image dataset"
+      description="Serve model to match input image to MNIST image dataset"
 
 USER root
 
@@ -47,10 +47,7 @@ EXPOSE 5000
 EXPOSE 9000
 
 # Define environment variables
-ENV MODEL_NAME mnist-model
+ENV MODEL_NAME MNISTImageModel
 ENV SERVICE_TYPE MODEL
-
-# Changing folder to default user
-RUN chown -R 8888 /app
 
 CMD exec seldon-core-microservice $MODEL_NAME --service-type $SERVICE_TYPE
