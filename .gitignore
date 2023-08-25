@@ -2,6 +2,7 @@ train-model/src/tmp*
 train-model/src/temp*
 serve-model/src/tmp*
 serve-model/src/temp*
+*.keras
 
 
 # Byte-compiled / optimized / DLL files
