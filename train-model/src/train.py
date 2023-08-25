@@ -11,9 +11,12 @@ import pathlib
 def log(e):
     print("{0}\n".format(e))
 
+# start
+log("start")
+
 # file vars
 bucket_name = os.getenv('BUCKET_NAME', 'mnist-model')
-model_file_name = os.getenv('MODEL_FILE_NAME', 'mnist-model')
+model_file_name = os.getenv('MODEL_FILE_NAME', 'mnist-model.keras')
 train_csv = os.getenv('TRAIN_CSV', 'mnist_train.csv')
 test_csv = os.getenv('TEST_CSV', 'mnist_test.csv')
 
@@ -97,38 +100,18 @@ log("model training complete")
 model.evaluate(test_features, test_labels)
 log("model test complete")
 
-#MODEL_DIR = tempfile.gettempdir()
-#version = 1
-#export_path = os.path.join(MODEL_DIR, str(version))
-#print('export_path = {}\n'.format(export_path))
 
-log("saving...")
-with tempfile.NamedTemporaryFile(suffix='.keras', mode='w', delete=False) as temp_file:
-    path_object = pathlib.Path(temp_file.name)
-    tf.keras.models.save(
-        model,
-        path_object,
-        overwrite=True,
-        include_optimizer=True,
-        save_format=None,
-        signatures=None,
-        options=None
-    )
-    cos.save_file(path_object, model_file_name)
+MODEL_DIR = tempfile.gettempdir()
+version = 1
+export_path = os.path.join(MODEL_DIR, str(version), model_file_name)
+print('export_path = {}\n'.format(export_path))
 
+# save to temporary dir
+model.save(export_path)
+# save to COS
+cos.save_model(export_path, model_file_name)
+log("saved to IBM Cloud Object Storage")
 
-# Recursively upload files from the source directory
-#cos_prefix = 'model/'  # The object key in your COS bucket
-#for root, dirs, files in os.walk(export_path):
-#    for file in files:
-#        local_path = os.path.join(root, file)
-#        relative_path = os.path.relpath(local_path, export_path)
-#        cos_key = os.path.join(cos_prefix, relative_path)
-        
-#        cos.save_model(local_path, cos_key)
-#        log(f"Uploaded '{local_path}' to '{cos_key}'")
-
-log("model saved and uploaded to IBM Cloud Object Storage")
 log("finish")
 
 
