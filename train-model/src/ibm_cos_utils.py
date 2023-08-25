@@ -71,6 +71,17 @@ def save_model(path_object, file_name):
         log("Unable to put file: {0}".format(e))
         sys.exit(1)
 
+def get_model_endpoint(): 
+    try:
+        log(COS_ENDPOINT)
+        return COS_ENDPOINT
+    except ClientError as be:
+        log(be)
+        sys.exit(1)
+    except Exception as e:
+        log("Unable to return model endpoint: {0}".format(e))
+        sys.exit(1)
+
 def test_connection():
     try:
         response = cos_cli.list_buckets()

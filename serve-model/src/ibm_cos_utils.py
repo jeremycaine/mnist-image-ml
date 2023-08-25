@@ -33,8 +33,8 @@ def get_file(file_name):
 
         # and file name
         fn = path.name
-
-        cos_cli.download_file(bucket_name, file_name, fn) 
+        cos_cli.download_file(Bucket=bucket_name, Key=file_name, Filename=fn) 
+        log("got file")
         return fn
     except ClientError as be:
         log(be)
@@ -43,7 +43,7 @@ def get_file(file_name):
         log("Unable to get file: {0}".format(e))
         sys.exit(1)
 
-def save_model(path_object, file_name): 
+def save_file(path_object, file_name): 
     try:
         cos_cli.upload_file(
             Filename=path_object, 
@@ -58,16 +58,10 @@ def save_model(path_object, file_name):
         log("Unable to put file: {0}".format(e))
         sys.exit(1)
 
-def save_file(path_object, file_name): 
+def save_model(path_object, file_name): 
     try:
-        with open(path_object, 'rb') as file:
-            # Use the file-like object here
-            # For example, you can read its contents
-            contents = file.read()            
-            cos_cli.put_object(
-                Bucket=bucket_name,
-                Key=file_name,
-                Body=contents) 
+        with open(path_object, 'rb') as file_data:
+            cos_cli.upload_fileobj(file_data, bucket_name, file_name)
 
         return 0
     except ClientError as be:
@@ -88,6 +82,15 @@ def get_model_endpoint():
         log("Unable to return model endpoint: {0}".format(e))
         sys.exit(1)
 
+def test_connection():
+    try:
+        response = cos_cli.list_buckets()
+        log("Connection successful. List of buckets:")
+        return(response['Buckets'])
+    except Exception as e:
+        log("Connection failed")
+        sys.exit(1)
+    
 # create cloud object storage connection
 cos_cli = ibm_boto3.client("s3",
     ibm_api_key_id=COS_API_KEY_ID,
@@ -97,22 +100,7 @@ cos_cli = ibm_boto3.client("s3",
     endpoint_url=COS_ENDPOINT
 )
 
-try:
-    response = cos_cli.list_buckets()
-    log("Connection successful")
-except Exception as e:
-    log("list buckets - Connection failed")
-    sys.exit(1)
+buckets = test_connection()
+log(buckets)
 
-
-directory_name = 'model'
-
-objects = cos_cli.list_objects(Bucket=bucket_name)
-
-for object in objects['Contents']:
-    path = object['Key']
-    print(path)
-#    if object['Prefix'] == directory_name:
-#        path = object['Key']
-#        break
 

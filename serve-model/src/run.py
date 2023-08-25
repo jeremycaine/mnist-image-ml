@@ -22,7 +22,6 @@ COS_STORAGE_CLASS = os.getenv('COS_STORAGE_CLASS','eu-gb-smart')
 bucket_name = os.getenv('BUCKET_NAME', 'mnist-model')
 keras_file_name = os.getenv('H5_FILE_NAME', 'mnist-model.keras')
 
-
 # create cloud objec storage connection
 cos_cli = ibm_boto3.client("s3",
     ibm_api_key_id=COS_API_KEY_ID,
@@ -35,39 +34,19 @@ cos_cli = ibm_boto3.client("s3",
 def log(e):
     print("{0}\n".format(e))
 
+# Create a temporary file
+with tempfile.NamedTemporaryFile() as f:
+    # Get the pathlib.Path object
+    path = pathlib.Path(f.name)
 
-class MNISTImageModel(object):
-    """
-    Model template. You can load your model parameters in __init__ from a location accessible at runtime
-    """
+# and file name
+fn = path.name
 
-    def __init__(self):
-        """
-        Add any initialization parameters. These will be passed at runtime from the graph definition parameters defined in your seldondeployment kubernetes resource manifest.
-        """
-        log("Initializing")
+cos_cli.download_file(bucket_name, keras_file_name, fn)  
+model = tf.keras.models.load_model(fn)
 
-        # Create a temporary file
-        with tempfile.NamedTemporaryFile() as f:
-            # Get the pathlib.Path object
-            path = pathlib.Path(f.name)
+#with h5py.File(fn, 'r') as hdf_file:
+#    model = tf.keras.models.load_model(hdf_file)
 
-        # and file name
-        fn = path.name
+log(model)
 
-        cos_cli.download_file(bucket_name, keras_file_name, fn)  
-        self.model = tf.keras.models.load_model(fn)
-
-    def predict(self,data):
-        """
-        Return a prediction.
-
-        Parameters
-        ----------
-        X : array-like
-        feature_names : array of feature names (optional)
-        """
-        log("Predict called - will run identity function")
-        return self.model.predict(data) 
-
-log("finished MyModel")
