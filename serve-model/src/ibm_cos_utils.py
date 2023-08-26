@@ -45,23 +45,14 @@ def get_file(file_name):
 
 def save_file(path_object, file_name): 
     try:
-        cos_cli.upload_file(
-            Filename=path_object, 
-            Bucket=bucket_name, 
-            Key=file_name)
-    
-        return 0
-    except ClientError as be:
-        log(be)
-        sys.exit(1)
-    except Exception as e:
-        log("Unable to put file: {0}".format(e))
-        sys.exit(1)
-
-def save_model(path_object, file_name): 
-    try:
-        with open(path_object, 'rb') as file_data:
-            cos_cli.upload_fileobj(file_data, bucket_name, file_name)
+        with open(path_object, 'rb') as file:
+            # Use the file-like object here
+            # For example, you can read its contents
+            contents = file.read()            
+            cos_cli.put_object(
+                Bucket=bucket_name,
+                Key=file_name,
+                Body=contents) 
 
         return 0
     except ClientError as be:

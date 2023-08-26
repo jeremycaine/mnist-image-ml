@@ -101,16 +101,22 @@ model.evaluate(test_features, test_labels)
 log("model test complete")
 
 
-MODEL_DIR = tempfile.gettempdir()
-version = 1
-export_path = os.path.join(MODEL_DIR, str(version), model_file_name)
-print('export_path = {}\n'.format(export_path))
+#MODEL_DIR = tempfile.gettempdir()
+#version = 1
+#export_path = os.path.join(MODEL_DIR, str(version), model_file_name)
+#print('export_path = {}\n'.format(export_path))
 
 # save to temporary dir
-model.save(export_path)
+#model.save(export_path)
 # save to COS
-cos.save_model(export_path, model_file_name)
-log("saved to IBM Cloud Object Storage")
+#cos.save_model(export_path, model_file_name)
+
+
+log("saving to IBM Cloud Object Storag...")
+with tempfile.NamedTemporaryFile(suffix='.keras', mode='w', delete=False) as temp_file:
+    path_object = pathlib.Path(temp_file.name)
+    model.save(temp_file.name, overwrite=True, include_optimizer=True)
+    cos.save_file(path_object, model_file_name)
 
 log("finish")
 
