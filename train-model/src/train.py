@@ -115,7 +115,7 @@ log("model test complete")
 log("saving to IBM Cloud Object Storag...")
 with tempfile.NamedTemporaryFile(suffix='.keras', mode='w', delete=False) as temp_file:
     path_object = pathlib.Path(temp_file.name)
-    model.save(temp_file.name, overwrite=True, include_optimizer=True)
+    model.save(temp_file.name, overwrite=True)
     cos.save_file(path_object, model_file_name)
 
 log("finish")
