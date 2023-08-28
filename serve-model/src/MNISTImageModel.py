@@ -7,7 +7,6 @@ import pathlib
 import ibm_boto3
 from ibm_botocore.client import Config
 from ibm_botocore.exceptions import ClientError
-import h5py
 
 
 # credentials
