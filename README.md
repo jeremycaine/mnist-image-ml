@@ -56,7 +56,7 @@ ibmcloud ce job update --name train-model --rebuild
 App to serve prediction model 
 ```
 # create app first time
-ibmcloud ce app create --name serve-model --src https://github.com/jeremycaine/mnist-image-ml --bcdr serve-model --str dockerfile --env-from-secret caine-cos-api-key --env-from-configmap mnist-model-cm --cpu 2 --memory 16G
+ibmcloud ce app create --name serve-model --src https://github.com/jeremycaine/mnist-image-ml --bcdr serve-model --str dockerfile --env-from-secret caine-cos-api-key --env-from-configmap mnist-model-cm --cpu 2 --memory 16G --port 9000
 
 # rebuild after git commit
 ibmcloud ce app update --name serve-model --rebuild

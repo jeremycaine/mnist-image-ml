@@ -41,7 +41,9 @@ def get_item(bucket_name, item_name):
             path = pathlib.Path(f.name)
         # and file name
         fn = path.name
+        print ("path.name = ", path.name)
         cos.Object(bucket_name, item_name).download_file(fn)
+        print ("in get_item fn = ", fn)
         return fn
     except ClientError as be:
         print("CLIENT ERROR: {0}\n".format(be))
@@ -61,6 +63,7 @@ class MNISTImageModel(object):
         log("Initializing")
 
         fn = get_item(bucket_name, model_file_name)
+        print("fn = ", fn)
         self.model = tf.keras.models.load_model(fn)
 
     def predict(self,data):
