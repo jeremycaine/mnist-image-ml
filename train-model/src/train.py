@@ -1,12 +1,14 @@
 import os
-import tempfile
+
+import ibm_boto3
+from ibm_botocore.client import Config, ClientError
 
 import tensorflow as tf
 import pandas as pd
 import numpy as np
 
-import ibm_cos_utils as cos
 import pathlib
+import tempfile
 
 def log(e):
     print("{0}\n".format(e))
@@ -14,14 +16,91 @@ def log(e):
 # start
 log("start")
 
+# https://cloud.ibm.com/docs/cloud-object-storage/libraries?topic=cloud-object-storage-python#python-examples-list-objects
+
+# Constants for IBM COS values
+COS_API_KEY_ID = os.getenv('COS_API_KEY_ID')
+COS_ENDPOINT = os.getenv('COS_ENDPOINT', 'https://s3.eu-gb.cloud-object-storage.appdomain.cloud')
+COS_INSTANCE_CRN = os.getenv('COS_INSTANCE_CRN', 'crn:v1:bluemix:public:cloud-object-storage:global:a/b71ac2564ef0b98f1032d189795994dc:875e3790-53c1-40b0-9943-33b010521174::')
+
 # file vars
 bucket_name = os.getenv('BUCKET_NAME', 'mnist-model')
+model_name = os.getenv('MODEL_NAME', 'mnist-model')
 model_file_name = os.getenv('MODEL_FILE_NAME', 'mnist-model.keras')
 train_csv = os.getenv('TRAIN_CSV', 'mnist_train.csv')
 test_csv = os.getenv('TEST_CSV', 'mnist_test.csv')
 
+# Create resource
+cos = ibm_boto3.resource("s3",
+    ibm_api_key_id=COS_API_KEY_ID,
+    ibm_service_instance_id=COS_INSTANCE_CRN,
+    config=Config(signature_version="oauth"),
+    endpoint_url=COS_ENDPOINT
+)
+
+def get_buckets():
+    print("Retrieving list of buckets")
+    try:
+        buckets = cos.buckets.all()
+        for bucket in buckets:
+            print("Bucket Name: {0}".format(bucket.name))
+    except ClientError as be:
+        print("CLIENT ERROR: {0}\n".format(be))
+    except Exception as e:
+        print("Unable to retrieve list buckets: {0}".format(e))
+
+def get_bucket_contents(bucket_name):
+    print("Retrieving bucket contents from: {0}".format(bucket_name))
+    try:
+        files = cos.Bucket(bucket_name).objects.all()
+        for file in files:
+            print("Item: {0} ({1} bytes).".format(file.key, file.size))
+    except ClientError as be:
+        print("CLIENT ERROR: {0}\n".format(be))
+    except Exception as e:
+        print("Unable to retrieve bucket contents: {0}".format(e))
+
+def get_item(bucket_name, item_name):
+    print("Retrieving item from bucket: {0}, key: {1}".format(bucket_name, item_name))
+    try:
+        # Create a temporary file
+        with tempfile.NamedTemporaryFile() as f:
+            # Get the pathlib.Path object
+            path = pathlib.Path(f.name)
+        # and file name
+        fn = path.name
+        cos.Object(bucket_name, item_name).download_file(fn)
+        return fn
+    except ClientError as be:
+        print("CLIENT ERROR: {0}\n".format(be))
+    except Exception as e:
+        print("Unable to retrieve file contents: {0}".format(e))
+
+def create_file(bucket_name, item_name, file_text):
+    print("Creating new item: {0}".format(item_name))
+    try:
+        cos.Object(bucket_name, item_name).put(
+            Body=file_text
+        )
+        print("Item: {0} created!".format(item_name))
+    except ClientError as be:
+        print("CLIENT ERROR: {0}\n".format(be))
+    except Exception as e:
+        print("Unable to create text file: {0}".format(e))
+
+def save_model(model_inst, model_file_name):
+    # Create a temporary file
+    with tempfile.NamedTemporaryFile(suffix='.keras', delete=False) as f:
+        model_inst.save(f.name)
+        path_object = pathlib.Path(f.name)
+        with open(f.name, "rb") as file:
+            file_contents = file.read()
+            create_file(bucket_name, model_file_name, file_contents)
+    os.remove(f.name)
+
+
 # -- Get the dataset
-test_df: pd.DataFrame = pd.read_csv(cos.get_file(test_csv), header=None)
+test_df: pd.DataFrame = pd.read_csv(get_item(bucket_name, test_csv), header=None)
 test_features: np.ndarray = test_df.loc[:, 1:].values
 test_features = test_features.reshape((test_features.shape[0], 28, 28, 1))
 test_features = test_features / 255.0
@@ -29,9 +108,9 @@ test_labels: np.ndarray = test_df[0].values
 log("created test labels")
 
 # -- Build the model
-train_df: pd.DataFrame = pd.read_csv(cos.get_file(train_csv), header=None)
+train_df: pd.DataFrame = pd.read_csv(get_item(bucket_name, train_csv), header=None)
 log("loaded train csv")
-test_df: pd.DataFrame = pd.read_csv(cos.get_file(test_csv), header=None)
+test_df: pd.DataFrame = pd.read_csv(get_item(bucket_name, test_csv), header=None)
 log("loaded test csv")
 
 # split data set, taking off the labels e.g. '7' (first element), from the others 
@@ -112,11 +191,8 @@ log("model test complete")
 #cos.save_model(export_path, model_file_name)
 
 
-log("saving to IBM Cloud Object Storag...")
-with tempfile.NamedTemporaryFile(suffix='.keras', mode='w', delete=False) as temp_file:
-    path_object = pathlib.Path(temp_file.name)
-    model.save(temp_file.name, overwrite=True)
-    cos.save_file(path_object, model_file_name)
+log("saving to IBM Cloud Object Storage...")
+save_model(model, model_file_name)
 
 log("finish")
 

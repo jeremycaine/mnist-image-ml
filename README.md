@@ -62,6 +62,10 @@ ibmcloud ce app create --name serve-model --src https://github.com/jeremycaine/m
 ibmcloud ce app update --name serve-model --rebuild
 ```
 
+### podman local
+podman build . -t mnist-model:v1
+podman run -i --rm -p 5001:5000 -e COS_API_KEY_ID=$COS_API_KEY_ID mnist-model:v1
+-- fails because of perms on fs
 
 #####
 Code to setup serving of the trained model
@@ -71,6 +75,7 @@ https://github.com/InfuseAI/showcase/blob/showcase/sc-25173/huggingface-transfor
 https://ruivieira.dev/serving-models-with-seldon.html
 
 https://docs.seldon.io/projects/seldon-core/en/latest/python/python_wrapping_docker.html
+https://docs.seldon.io/projects/seldon-core/en/latest/python/python_wrapping_docker.html 
 
 
 Sure. Here is an example of how to write a Python wrapper class and initialize a TensorFlow model so that it can be served:
@@ -149,9 +154,6 @@ def main():
 if __name__ == "__main__":
     main()
 
-### podman local
-podman build . -t mnist-model:v1
-podman run -i --rm -p 5001:5000 -e COS_API_KEY_ID=$COS_API_KEY_ID mnist-model:v1
 
 
 
