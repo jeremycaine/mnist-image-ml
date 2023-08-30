@@ -25,7 +25,7 @@ COS_INSTANCE_CRN = os.getenv('COS_INSTANCE_CRN', 'crn:v1:bluemix:public:cloud-ob
 
 # file vars
 bucket_name = os.getenv('BUCKET_NAME', 'mnist-model')
-model_name = os.getenv('MODEL_NAME', 'mnist-model')
+#model_name = os.getenv('MODEL_NAME', 'mnist-model')
 model_file_name = os.getenv('MODEL_FILE_NAME', 'mnist-model.keras')
 train_csv = os.getenv('TRAIN_CSV', 'mnist_train.csv')
 test_csv = os.getenv('TEST_CSV', 'mnist_test.csv')
@@ -97,7 +97,6 @@ def save_model(model_inst, model_file_name):
             file_contents = file.read()
             create_file(bucket_name, model_file_name, file_contents)
     os.remove(f.name)
-
 
 # -- Get the dataset
 test_df: pd.DataFrame = pd.read_csv(get_item(bucket_name, test_csv), header=None)
