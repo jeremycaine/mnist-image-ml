@@ -79,6 +79,11 @@ class MNISTImageModel(object):
         """
         log("Predict called - will run identity function")
         return self.model.predict(data) 
+    
+    def health_status(self):
+        response = self.predict([1, 2], ["f1", "f2"])
+        assert len(response) == 2, "health check returning bad predictions" # or some other simple validation
+        return response
 
 #model = get_model(bucket_name, 'test.keras')
 #model = get_model(bucket_name, model_file_name)
