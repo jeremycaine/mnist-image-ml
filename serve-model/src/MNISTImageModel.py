@@ -36,12 +36,14 @@ def get_model(bucket_name, item_name):
     try:
         # Get the object
         cos_object = cos.Object(bucket_name, item_name)
+        print("cos_object ", cos_object)
 
         # Download the object to a file
         with open(item_name, 'wb') as f:
             cos_object.download_fileobj(f)
             path = pathlib.Path(f.name)
 
+        print("path name", path.name)
         with h5py.File(path.name, 'r') as hdf_file:
             model = tf.keras.models.load_model(hdf_file)
    
@@ -78,4 +80,7 @@ class MNISTImageModel(object):
         log("Predict called - will run identity function")
         return self.model.predict(data) 
 
+#model = get_model(bucket_name, 'test.keras')
+#model = get_model(bucket_name, model_file_name)
+#log(model)
 log("finished MNISTImageModel")

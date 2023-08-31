@@ -13,7 +13,7 @@ Logging -
 ibmcloud login --sso ...
 
 ibmcloud target -c b71ac2564ef0b98f1032d189795994dc
-ibmcloud target -r us-east
+ibmcloud target -r us-south
 ibmcloud target -g ceh-group
 
 ibmcloud ce project create --name mnist-model
@@ -25,7 +25,7 @@ ibmcloud ce project list
 ibmcloud ce project select --name mnist-model
 
 # need secret
-ibmcloud ce secret create --name caine-cos-api-key --from-literal COS_API_KEY_ID=xxxxxxx
+ibmcloud ce secret create --name caine-cos-api-key --from-literal COS_API_KEY_ID=xxx
 
 # config map for variables
 ibmcloud ce configmap create --name mnist-model-cm \
@@ -61,6 +61,19 @@ ibmcloud ce app create --name serve-model --src https://github.com/jeremycaine/m
 # rebuild after git commit
 ibmcloud ce app update --name serve-model --rebuild
 ```
+
+### test
+curl -v http://0.0.0.0:9000/v2/models/iris/infer \
+        -H "Content-Type: application/json" \
+        -d '{"inputs": [{"name": "predict", "shape": [1, 4], "datatype": "FP32", "data": [[1, 2, 3, 4]]}]}'
+
+https://serve-model.16qg6j0mog3v.us-south.codeengine.appdomain.cloud
+
+curl -v https://serve-model.16qg6j0mog3v.us-south.codeengine.appdomain.cloud:9000/healthz
+
+curl -v https://serve-model.16qg6j0mog3v.us-south.codeengine.appdomain.cloud:9000/v2/models/MNISTImageModel/predict \
+        -H "Content-Type: application/json" \
+        -d '{"inputs": [{"name": "predict", "shape": [1, 4], "datatype": "FP32", "data": [[1, 2, 3, 4]]}]}'
 
 ### podman local
 podman build . -t mnist-model:v1
