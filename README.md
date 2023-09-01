@@ -62,6 +62,11 @@ ibmcloud ce app create --name serve-model --src https://github.com/jeremycaine/m
 ibmcloud ce app update --name serve-model --rebuild
 ```
 
+curl https://serve-model.16qg6j0mog3v.us-south.codeengine.appdomain.cloud/health/status
+{"status":{"code":-1,"info":"predict() takes 2 positional arguments but 3 were given","reason":"MICROSERVICE_INTERNAL_ERROR","status":1}}
+(base) ➜  mnist-image-ml git:(main) curl https://serve-model.16qg6j0mog3v.us-south.codeengine.appdomain.cloud/health/ping
+pong%
+
 ### test
 curl -v http://0.0.0.0:9000/v2/models/iris/infer \
         -H "Content-Type: application/json" \

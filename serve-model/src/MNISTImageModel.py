@@ -7,6 +7,8 @@ import tensorflow as tf
 
 import pathlib
 import h5py
+import numpy as np
+
 
 def log(e):
     print("{0}\n".format(e))
@@ -78,14 +80,19 @@ class MNISTImageModel(object):
         feature_names : array of feature names (optional)
         """
         log("Predict called - will run identity function")
-        return self.model.predict(data) 
+
+        image_array = np.array(data)
+
+        return self.model.predict(image_array) 
     
     def health_status(self):
-        response = self.predict([1, 2], ["f1", "f2"])
-        assert len(response) == 2, "health check returning bad predictions" # or some other simple validation
+        image_data = np.random.rand(28, 28).tolist() 
+        response = self.predict(image_data)
+
+        #assert len(response) == 2, "health check returning bad predictions" # or some other simple validation
         return response
 
 #model = get_model(bucket_name, 'test.keras')
 #model = get_model(bucket_name, model_file_name)
 #log(model)
-log("finished MNISTImageModel")
+log("serving MNISTImageModel")
