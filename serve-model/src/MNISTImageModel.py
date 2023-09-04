@@ -82,7 +82,8 @@ class MNISTImageModel(object):
         """
         log("Initializing - getting model instance")
         self.model = get_model_instance(bucket_name, model_file_name)
-        log("Model instance is: " + self.model)
+        log("Model instance is:")
+        log(self.model)
 
     def predict(self,data):
         """
