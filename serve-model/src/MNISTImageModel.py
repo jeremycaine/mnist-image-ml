@@ -100,11 +100,15 @@ class MNISTImageModel(object):
 
         return self.model.predict(image_array) 
     
+#    seldon_core.wrapper:handle_generic_exception:53 - ERROR:  {'status': {'status': 1, 'info': 'predict() takes 2 positional arguments but 3 were given', 'code': -1, 'reason': 'MICROSERVICE_INTERNAL_ERROR'}}
+    
     def health_status(self):
-        image_data = np.random.rand(28, 28).tolist() 
+        image_data = np.random.rand(28, 28) 
         response = self.predict(image_data)
 
         #assert len(response) == 2, "health check returning bad predictions" # or some other simple validation
+        log("health status respons")
+        log(response)
         return response
 
 #model = get_model_instance(bucket_name, 'test.keras')

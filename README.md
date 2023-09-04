@@ -67,6 +67,7 @@ curl https://serve-model.16qg6j0mog3v.us-south.codeengine.appdomain.cloud/health
 (base) ➜  mnist-image-ml git:(main) curl https://serve-model.16qg6j0mog3v.us-south.codeengine.appdomain.cloud/health/ping
 pong%
 
+# NOTES 
 ### test
 curl -v http://0.0.0.0:9000/v2/models/iris/infer \
         -H "Content-Type: application/json" \
@@ -173,6 +174,38 @@ def main():
 if __name__ == "__main__":
     main()
 
+
+## fine tune training 
+think about how Seldon does Transformers that can be used like this
+
+Sure, here is an example of code for fine-tuning a LLM hosted on Hugging Face:
+
+```python
+import transformers
+
+model = transformers.AutoModelForSequenceClassification.from_pretrained("bert-base-uncased")
+
+# Load the dataset
+train_dataset = torch.load("train_dataset.pt")
+test_dataset = torch.load("test_dataset.pt")
+
+# Fine-tune the model
+model.fine_tune(train_dataset, epochs=10)
+
+# Evaluate the model on the test dataset
+model.evaluate(test_dataset)
+```
+
+This code first imports the `transformers` library, which provides the necessary classes and functions for fine-tuning LLMs. Next, it creates a model object from the `bert-base-uncased` pre-trained model. This model is then loaded with the training dataset, and fine-tuned for 10 epochs. Finally, the model is evaluated on the test dataset.
+
+Here is a more detailed explanation of the code:
+
+* The `from_pretrained()` method of the `AutoModelForSequenceClassification` class loads a pre-trained LLM model from Hugging Face. The `bert-base-uncased` model is a BERT model that has been pre-trained on a large corpus of text data.
+* The `torch.load()` function loads the training and test datasets from disk. These datasets are in PyTorch format, and they contain the text and labels for the data points.
+* The `fine_tune()` method of the `AutoModelForSequenceClassification` class fine-tunes the model on the training dataset. The `epochs` parameter specifies the number of times the model will be trained on the data.
+* The `evaluate()` method of the `AutoModelForSequenceClassification` class evaluates the model on the test dataset. This method returns the accuracy of the model on the test data.
+
+This is just a basic example of how to fine-tune a LLM hosted on Hugging Face. There are many other ways to fine-tune a model, and the specific approach you take will depend on the specific model and dataset you are using.
 
 
 
