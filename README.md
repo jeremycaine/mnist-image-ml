@@ -81,8 +81,9 @@ curl -v https://serve-model.16qg6j0mog3v.us-south.codeengine.appdomain.cloud:900
         -d '{"inputs": [{"name": "predict", "shape": [1, 4], "datatype": "FP32", "data": [[1, 2, 3, 4]]}]}'
 
 ### podman local
+seldon-core-microservice MNISTImageModel --service-type MODEL
 podman build . -t mnist-model:v1
-podman run -i --rm -p 5001:5000 -e COS_API_KEY_ID=$COS_API_KEY_ID mnist-model:v1
+podman run -i --rm -p 9000:9000 -e COS_API_KEY_ID=$COS_API_KEY_ID mnist-model:v1
 -- fails because of perms on fs
 
 #####

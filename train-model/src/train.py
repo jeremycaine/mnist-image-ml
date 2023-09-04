@@ -90,7 +90,7 @@ def create_file(bucket_name, item_name, file_text):
 
 def save_model(model_inst, model_file_name):
     # Create a temporary file
-    with tempfile.NamedTemporaryFile(suffix='.keras', delete=False) as f:
+    with tempfile.NamedTemporaryFile(suffix='.keras', mode='w', delete=False) as f:
         model_inst.save(f.name)
         path_object = pathlib.Path(f.name)
         with open(f.name, "rb") as file:
