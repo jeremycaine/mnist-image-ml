@@ -49,14 +49,13 @@ import requests
 
 def predict(data):
     """Makes a REST call to the model server and returns the predictions."""
-
     #url = "https://serve-model.16qg6j0mog3v.us-south.codeengine.appdomain.cloud/predict"
     url = "http://0.0.0.0:9000/predict"
     headers = {"Content-Type": "application/json"}
-    data = json.dumps({"data": data.tolist()})
-    print(type(data))
+    data = json.dumps({"data": {"ndarray": data.tolist()}})
     
     response = requests.post(url, headers=headers, data=data)
+    print("response: ", response)
 
     if response.status_code == 200:
         return response.json()["prediction"]
@@ -121,6 +120,7 @@ def image():
         list(inverted_image.tobytes())).reshape((1, 28, 28, 1))
 
     scaled_image_array = reshaped_image / 255.0
+    print("scaled_image_array type: ", scaled_image_array)
 
     # now call the model to predict what the digit the image is
     out = predict(scaled_image_array)

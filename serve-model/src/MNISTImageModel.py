@@ -12,9 +12,11 @@ import numpy as np
 import tempfile
 from PIL import Image
 import json
+import logging
+
 
 def log(e):
-    print("{0}\n".format(e))
+   print("{0}\n".format(e))
 
 # start
 log("start")
@@ -86,45 +88,36 @@ class MNISTImageModel(object):
         log("Model instance is:")
         log(self.model)
 
-    def predict(self,data):
+    def predict(self, data, features_names=None):
         """
         Return a prediction.
-
-        Parameters
-        ----------
-        X : array-like
-        feature_names : array of feature names (optional)
         """
         log("Predict called - will run identity function")
-        d = json.loads(data)
-        print("data to convert to image array: ", d['data'])
+        image_array = np.array(data)
 
-        image_array = np.array(d['data'])
-        print("image array in on type:", type(image_array))
-
-        return self.model.predict(image_array) 
-    
-#    seldon_core.wrapper:handle_generic_exception:53 - ERROR:  {'status': {'status': 1, 'info': 'predict() takes 2 positional arguments but 3 were given', 'code': -1, 'reason': 'MICROSERVICE_INTERNAL_ERROR'}}
-    
+        result = self.model.predict(image_array) 
+        print("result: :", result)
+        return result
+        
     def health_status(self):
-        random_image = np.random.randint(0, 256, size=(20, 20, 4), dtype=np.uint8)
+        """
+        Health check that tests a prediction.
+        """
+        # Create a random image using NumPy
+        random_image = np.random.rand(28, 28, 1) * 255 
+        
+        # Convert the NumPy array to an image
+        random_image = random_image.astype(np.uint8)  # Ensure the pixel values are in the correct range
+        random_image = Image.fromarray(random_image.squeeze(), 'L')  # 'L' mode for grayscale images
 
-        # Create a PIL Image from the random image data
-        pilimage = Image.fromarray(random_image)
-        # Resize it to the right internal size
-        pilimage = pilimage.resize((20, 20))
         # Convert the image to the (28, 28, 1) format expected by the model
-        reshaped_image = np.array(list(pilimage.tobytes())).reshape((1, 28, 28, 1))
-        scaled_image_array = reshaped_image / 255.0
+        scaled_image_array = np.array(random_image.reshape((1, 28, 28, 1)))
+        #scaled_image_array = reshaped_image / 255.0
 
         response = self.predict(scaled_image_array)
 
-        #assert len(response) == 2, "health check returning bad predictions" # or some other simple validation
         log("health status respons")
         log(response)
         return response
-
-#model = get_model_instance(bucket_name, 'test.keras')
-#model = get_model_instance(bucket_name, model_file_name)
 
 log("serving MNISTImageModel")

@@ -178,18 +178,6 @@ log("model training complete")
 model.evaluate(test_features, test_labels)
 log("model test complete")
 
-
-#MODEL_DIR = tempfile.gettempdir()
-#version = 1
-#export_path = os.path.join(MODEL_DIR, str(version), model_file_name)
-#print('export_path = {}\n'.format(export_path))
-
-# save to temporary dir
-#model.save(export_path)
-# save to COS
-#cos.save_model(export_path, model_file_name)
-
-
 log("saving to IBM Cloud Object Storage...")
 save_model(model, model_file_name)
 
