@@ -10,7 +10,8 @@ import pathlib
 import h5py
 import numpy as np
 import tempfile
-
+from PIL import Image
+import json
 
 def log(e):
     print("{0}\n".format(e))
@@ -95,16 +96,28 @@ class MNISTImageModel(object):
         feature_names : array of feature names (optional)
         """
         log("Predict called - will run identity function")
+        d = json.loads(data)
+        print("data to convert to image array: ", d['data'])
 
-        image_array = np.array(data)
+        image_array = np.array(d['data'])
+        print("image array in on type:", type(image_array))
 
         return self.model.predict(image_array) 
     
 #    seldon_core.wrapper:handle_generic_exception:53 - ERROR:  {'status': {'status': 1, 'info': 'predict() takes 2 positional arguments but 3 were given', 'code': -1, 'reason': 'MICROSERVICE_INTERNAL_ERROR'}}
     
     def health_status(self):
-        image_data = np.random.rand(28, 28) 
-        response = self.predict(image_data)
+        random_image = np.random.randint(0, 256, size=(20, 20, 4), dtype=np.uint8)
+
+        # Create a PIL Image from the random image data
+        pilimage = Image.fromarray(random_image)
+        # Resize it to the right internal size
+        pilimage = pilimage.resize((20, 20))
+        # Convert the image to the (28, 28, 1) format expected by the model
+        reshaped_image = np.array(list(pilimage.tobytes())).reshape((1, 28, 28, 1))
+        scaled_image_array = reshaped_image / 255.0
+
+        response = self.predict(scaled_image_array)
 
         #assert len(response) == 2, "health check returning bad predictions" # or some other simple validation
         log("health status respons")

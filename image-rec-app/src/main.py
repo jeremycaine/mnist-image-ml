@@ -50,7 +50,8 @@ import requests
 def predict(data):
     """Makes a REST call to the model server and returns the predictions."""
 
-    url = "https://serve-model.16qg6j0mog3v.us-south.codeengine.appdomain.cloud/predict"
+    #url = "https://serve-model.16qg6j0mog3v.us-south.codeengine.appdomain.cloud/predict"
+    url = "http://0.0.0.0:9000/predict"
     headers = {"Content-Type": "application/json"}
     data = json.dumps({"data": data.tolist()})
     print(type(data))

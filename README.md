@@ -62,13 +62,24 @@ ibmcloud ce app create --name serve-model --src https://github.com/jeremycaine/m
 ibmcloud ce app update --name serve-model --rebuild
 ```
 
+### podman local
+```
+podman machine start
+podman build . -t mnist-model:v1
+podman run -i -u root --rm -p 9000:9000 -v "var:/tmp" -e COS_API_KEY_ID=$COS_API_KEY_ID mnist-model:v1
+curl -v http://0.0.0.0:9000/health/status
+
+```
+
+
+
+# NOTES 
+### test
 curl https://serve-model.16qg6j0mog3v.us-south.codeengine.appdomain.cloud/health/status
 {"status":{"code":-1,"info":"predict() takes 2 positional arguments but 3 were given","reason":"MICROSERVICE_INTERNAL_ERROR","status":1}}
 (base) ➜  mnist-image-ml git:(main) curl https://serve-model.16qg6j0mog3v.us-south.codeengine.appdomain.cloud/health/ping
 pong%
 
-# NOTES 
-### test
 curl -v http://0.0.0.0:9000/v2/models/iris/infer \
         -H "Content-Type: application/json" \
         -d '{"inputs": [{"name": "predict", "shape": [1, 4], "datatype": "FP32", "data": [[1, 2, 3, 4]]}]}'
@@ -81,11 +92,6 @@ curl -v https://serve-model.16qg6j0mog3v.us-south.codeengine.appdomain.cloud:900
         -H "Content-Type: application/json" \
         -d '{"inputs": [{"name": "predict", "shape": [1, 4], "datatype": "FP32", "data": [[1, 2, 3, 4]]}]}'
 
-### podman local
-seldon-core-microservice MNISTImageModel --service-type MODEL
-podman build . -t mnist-model:v1
-podman run -i --rm -p 9000:9000 -e COS_API_KEY_ID=$COS_API_KEY_ID mnist-model:v1
--- fails because of perms on fs
 
 #####
 Code to setup serving of the trained model
